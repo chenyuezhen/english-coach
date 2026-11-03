@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Coach</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c15f3c'/%3E%3Cg stroke='%23faf9f5' stroke-width='6.5' stroke-linecap='round' fill='none'%3E%3Cpath d='M22 18h20M22 32h14M22 46h20M22 18v28'/%3E%3C/g%3E%3Ccircle cx='47' cy='46' r='4' fill='%23faf9f5'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#faf9f5;--surface:#ffffff;--surface-2:#f5f4ef;--surface-3:#efede5;
+  --line:#e8e4da;--line-2:#d9d4c7;
+  --text:#1f1e1d;--text-2:#5c5b57;--text-3:#8b8a82;
+  --lime:#c15f3c;--violet:#7a6a94;--cyan:#4a7a5c;--coral:#b4452f;--amber:#a8762f;
+  --grad-1:#c15f3c;
+  --grad-2:#1f1e1d;
+  --r:12px;
+  --font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  --serif:ui-serif,Georgia,"Songti SC","Times New Roman",serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.65 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--lime);text-decoration:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:9px;border:3px solid var(--bg);background-clip:content-box}
+
+/* ---------- 登录 ---------- */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-wrap{width:100%;max-width:392px}
+.brand{display:flex;align-items:center;gap:11px;justify-content:center}
+.mark{width:34px;height:34px;flex:none;display:block;line-height:0;opacity:.95}
+.mark svg{width:100%;height:100%;display:block}
+.brand-t{font-family:var(--serif);font-size:17px;font-weight:500;letter-spacing:-.2px}
+.brand-s{font-size:10px;color:var(--text-3);letter-spacing:.14em;margin-top:1px;font-weight:500}
+.login-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px 30px;margin-top:36px}
+.login-h{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-.3px;margin:0 0 6px}
+.login-p{color:var(--text-3);font-size:12.5px;margin:0 0 24px;line-height:1.7}
+label.f{display:block;margin-bottom:14px}
+label.f>span{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:7px}
+.inp{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--line-2);
+  border-radius:9px;outline:none;transition:.15s;color:var(--text);resize:vertical;font-size:13.5px}
+.inp::placeholder{color:#b5b3a9}
+.inp:focus{border-color:var(--lime);box-shadow:0 0 0 3px rgba(193,95,60,.1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;
+  border-radius:9px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;
+  font-weight:500;font-size:13px;transition:.15s;white-space:nowrap;color:var(--text)}
+.btn:hover{background:var(--surface-2);border-color:#c9c4b6}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-lime{background:#1f1e1d;border-color:#1f1e1d;color:#faf9f5}
+.btn-lime:hover{background:#35332f;border-color:#35332f;color:#faf9f5}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn-block{width:100%;padding:11px;margin-top:8px}
+.alert{padding:10px 13px;border-radius:9px;font-size:12.5px;margin-bottom:14px;display:none;
+  background:#fdf1ee;color:var(--coral);border:1px solid #f3d9d2}
+.alert.show{display:block}
+
+/* ---------- 布局 ---------- */
+#app{display:none}
+.shell{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.side{background:#f6f5f0;border-right:1px solid var(--line);padding:22px 14px;
+  display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+.side .brand{justify-content:flex-start;margin:0 8px 26px}
+.nl{font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.1em;
+  text-transform:uppercase;margin:18px 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;
+  color:var(--text-2);font-weight:450;font-size:13.5px;transition:.13s;border:none;background:none;
+  width:100%;text-align:left;position:relative}
+.nav:hover{background:#eeece5;color:var(--text)}
+.nav.on{background:#eeece5;color:var(--text);font-weight:500}
+.nav.on::before{content:"";position:absolute;left:-14px;top:50%;transform:translateY(-50%);
+  width:3px;height:16px;border-radius:0 3px 3px 0;background:var(--lime)}
+.nav svg{width:15px;height:15px;flex:none;stroke-width:1.7;opacity:.75}
+.side-foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.who{display:flex;align-items:center;gap:9px;padding:8px 8px 10px}
+.av{width:28px;height:28px;border-radius:50%;background:#1f1e1d;display:grid;place-items:center;
+  color:#faf9f5;font-size:11.5px;font-weight:600;flex:none}
+.wn{font-size:12.5px;font-weight:550;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wr{font-size:11px;color:var(--text-3);line-height:1.35}
+
+.main{padding:0 40px 90px;max-width:1120px;width:100%}
+.top{padding:36px 0 22px;border-bottom:1px solid var(--line);margin-bottom:28px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pt{font-family:var(--serif);font-size:27px;font-weight:500;letter-spacing:-.4px;margin:0;line-height:1.25}
+.ps{color:var(--text-3);font-size:13px;margin:6px 0 0}
+.view{display:none}
+.view.on{display:block;animation:up .3s cubic-bezier(.16,1,.3,1)}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pad{padding:22px 24px}
+.ct{font-size:12px;font-weight:550;color:var(--text-2);margin:0 0 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* ---------- 概览 ---------- */
+.hero{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:12px;margin-bottom:20px}
+.lvl{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.lvl-k{font-size:11px;font-weight:500;color:var(--text-3)}
+.lvl-n{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+.lvl-n b{font-family:var(--serif);font-size:32px;font-weight:500;letter-spacing:-1px;line-height:1;color:var(--text)}
+.lvl-n span{font-size:12px;color:var(--text-3)}
+.lvl-bar{height:3px;border-radius:2px;background:var(--surface-3);margin-top:14px;overflow:hidden}
+.lvl-bar i{display:block;height:100%;border-radius:2px;background:var(--lime);transition:width .6s cubic-bezier(.16,1,.3,1)}
+.lvl-x{font-size:11.5px;color:var(--text-3);margin-top:8px;font-variant-numeric:tabular-nums}
+.mt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;transition:.15s}
+.mt:hover{border-color:var(--line-2)}
+.mt-k{font-size:11px;font-weight:500;color:var(--text-3)}
+.mt-v{font-family:var(--serif);font-size:27px;font-weight:500;letter-spacing:-.6px;margin-top:8px;line-height:1;
+  font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:4px}
+.mt-v small{font-family:var(--font);font-size:12px;font-weight:400;color:var(--text-3);letter-spacing:0}
+.mt-d{font-size:11.5px;color:var(--text-3);margin-top:7px}
+.grid2{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+
+/* ---------- 日历 ---------- */
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-m{font-size:13.5px;font-weight:550}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cd{text-align:center;font-size:10.5px;color:var(--text-3);font-weight:500;padding-bottom:4px}
+.cc{aspect-ratio:1;border-radius:8px;background:transparent;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:12.5px;font-weight:450;
+  color:var(--text-2);transition:.13s;position:relative;border:1px solid transparent}
+.cc:hover{border-color:var(--line-2);background:var(--surface-2)}
+.cc.empty{background:transparent;cursor:default;pointer-events:none}
+.cc.today{box-shadow:inset 0 0 0 1px var(--line-2);font-weight:600}
+.cc.sel{background:#1f1e1d;color:#faf9f5;font-weight:600;border-color:#1f1e1d}
+.cc.has{background:#f7ece7;color:var(--lime);font-weight:550}
+.cc.sel.has{background:#1f1e1d;color:#faf9f5}
+.cc .dt{width:3.5px;height:3.5px;border-radius:50%;background:var(--lime)}
+.cc.sel .dt{background:#faf9f5}
+.cc .ex{position:absolute;top:5px;right:5px;width:4px;height:4px;border-radius:50%;background:var(--cyan)}
+.lg{display:flex;gap:16px;margin-top:16px;font-size:11.5px;color:var(--text-3);flex-wrap:wrap}
+.lg i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* ---------- 今日练习入口 ---------- */
+.quest{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px}
+.quest-top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.qpill{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;
+  background:#f7ece7;color:var(--lime)}
+.qpill.done{background:#eef3ef;color:var(--cyan)}
+.quest-n{font-family:var(--serif);font-size:17px;font-weight:500;letter-spacing:-.2px;margin:0 0 8px}
+.quest-p{font-size:13px;color:var(--text-2);margin:0 0 18px;line-height:1.7}
+.quest-score{font-family:var(--serif);display:flex;align-items:baseline;gap:6px;font-size:36px;
+  font-weight:500;letter-spacing:-1px;line-height:1;color:var(--text)}
+.quest-score small{font-family:var(--font);font-size:14px;color:var(--text-3);font-weight:400;letter-spacing:0}
+.stars{display:flex;gap:5px;margin-top:12px}
+.stars i{font-size:14px;opacity:.18;font-style:normal;transition:.3s;color:var(--amber)}
+.stars i.on{opacity:1}
+
+/* ---------- 记录 ---------- */
+.ev{padding:20px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:none;padding-bottom:0}
+.ev:first-child{padding-top:0}
+.ev-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:11px;font-size:11.5px;color:var(--text-3)}
+.tag{font-size:11px;font-weight:450;padding:2px 8px;border-radius:5px;
+  background:var(--surface-2);color:var(--text-2);border:1px solid var(--line)}
+.tag.lime{background:#f7ece7;color:var(--lime);border-color:#eed9d0}
+.tag.violet{background:#f1eef4;color:var(--violet);border-color:#e4dfe9}
+.tag.cyan{background:#eef3ef;color:var(--cyan);border-color:#dde8e1}
+.tag.coral{background:#fdf1ee;color:var(--coral);border-color:#f3d9d2}
+.src{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border-radius:7px;
+  padding:9px 12px;margin:9px 0;color:var(--text-2);word-break:break-word;line-height:1.65;
+  border:1px solid var(--line)}
+.why{font-size:13px;color:var(--text-2);margin:8px 0;line-height:1.7}
+.lvs{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.lvr{display:flex;gap:12px;font-size:13px;align-items:flex-start}
+.lvk{flex:none;width:44px;font-size:11px;color:var(--text-3);padding-top:2px;font-weight:500}
+.lvv{color:var(--text);word-break:break-word;line-height:1.7}
+.pat{font-size:12.5px;color:var(--text-2);background:var(--surface-2);border-radius:7px;
+  padding:9px 12px;margin-top:12px;border-left:2px solid var(--violet);line-height:1.65}
+.pat b{color:var(--violet);font-weight:550;margin-right:6px;font-size:11px}
+.empty{padding:52px 20px;text-align:center;color:var(--text-3);font-size:13px;line-height:1.95}
+.empty .ic{font-size:22px;opacity:.3;margin-bottom:10px;display:block}
+
+/* ---------- 试卷 ---------- */
+.paper-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding:20px 26px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ph-title{font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:-.1px}
+.ph-meta{font-size:11.5px;color:var(--text-3);margin-top:4px;letter-spacing:.02em}
+.ph-r{display:flex;gap:18px;align-items:center}
+.paper-prog{height:3px;background:var(--surface-3)}
+.paper-prog i{display:block;height:100%;background:var(--lime);transition:width .4s cubic-bezier(.16,1,.3,1)}
+.paper-rule{display:flex;gap:34px;flex-wrap:wrap;padding:16px 26px;font-size:12.5px;
+  color:var(--text-2);border-bottom:1px dashed var(--line-2)}
+.paper-rule .fill-line{display:inline-block;min-width:96px;border-bottom:1px solid var(--line-2);
+  padding:0 6px 2px;font-style:normal;color:var(--text-3);min-height:18px}
+.paper-note{padding:14px 26px;font-size:12px;color:var(--text-3);line-height:1.8;
+  background:var(--surface-2);border-bottom:1px solid var(--line)}
+.paper-section{display:flex;align-items:baseline;gap:10px;padding:22px 26px 4px}
+.ps-num{font-family:var(--serif);font-size:14px;font-weight:500;color:var(--text)}
+.ps-name{font-size:13.5px;color:var(--text-2)}
+.ps-cnt{font-size:11px;color:var(--text-3);margin-left:auto}
+.pq{padding:18px 26px 20px;border-bottom:1px solid var(--line)}
+.pq:last-of-type{border-bottom:none}
+.pq-stem{display:flex;gap:10px;font-size:14px;line-height:1.75;margin-bottom:12px}
+.pq-no{flex:none;width:24px;color:var(--text-3);font-weight:500;
+  font-variant-numeric:tabular-nums;text-align:right}
+.pq-ctx{font-size:12px;color:var(--text-3);background:var(--surface-2);border-radius:6px;
+  padding:7px 11px;margin:0 0 12px 34px;font-family:var(--mono);line-height:1.6;border:1px solid var(--line)}
+.fill-sentence{margin-left:34px;font-size:14.5px;line-height:2.4;color:var(--text);word-break:break-word}
+.fill-in{display:inline-block;width:128px;margin:0 4px;padding:1px 8px 2px;
+  border:none;border-bottom:1.5px solid var(--line-2);background:transparent;
+  font-family:var(--mono);font-size:13.5px;color:var(--text-2);outline:none;text-align:center;
+  transition:.15s;border-radius:0}
+.fill-in::placeholder{color:#cfccc2;font-size:12.5px}
+.fill-in:focus{border-bottom-color:var(--lime);background:#fdf9f7;color:var(--text)}
+.paper-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 26px;background:var(--surface-2);border-top:1px solid var(--line);flex-wrap:wrap}
+.pf-note{font-size:12px;color:var(--text-3)}
+.result-score .pc{font-size:22px;letter-spacing:0;color:var(--text-3);margin-left:2px}
+.rev-q{font-size:13.5px;font-weight:500;line-height:1.7;margin-bottom:8px}
+.rev-blank{font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:6px;padding:7px 11px;margin-bottom:9px;line-height:1.7}
+.rev-line{display:flex;gap:9px;align-items:baseline;font-size:13px;line-height:1.8;color:var(--text)}
+.mk-bad,.mk-good{flex:none;font-size:11px;padding:1px 7px;border-radius:4px;font-weight:500}
+.mk-bad{background:#fdf1ee;color:var(--coral);border:1px solid #f3d9d2}
+.mk-good{background:#eef3ef;color:var(--cyan);border:1px solid #dde8e1}
+.rev-exp{font-size:12.5px;color:var(--text-2);margin-top:9px;line-height:1.75;
+  border-left:2px solid var(--line-2);padding-left:10px}
+
+/* ---------- 练习旧样式 ---------- */
+.exam-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--surface-2)}
+.hud{display:flex;gap:24px;align-items:center}
+.hud-i{display:flex;flex-direction:column;gap:1px}
+.hud-k{font-size:10px;font-weight:500;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase}
+.hud-v{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25}
+.hud-v.combo{color:var(--text-2);font-weight:500}
+.pbar{height:3px;background:var(--surface-3);border-radius:2px;overflow:hidden;width:100%}
+.pbar i{display:block;height:100%;background:var(--lime);border-radius:2px;transition:width .4s cubic-bezier(.16,1,.3,1)}
+.q{padding:24px;border-bottom:1px solid var(--line)}
+.q:last-of-type{border-bottom:none}
+.q-stem{font-weight:500;font-size:14.5px;margin-bottom:13px;line-height:1.7;display:flex;gap:11px}
+.q-no{flex:none;width:22px;height:22px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--text-3);margin-top:1px}
+.q-no.ok{background:#eef3ef;border-color:#dde8e1;color:var(--cyan)}
+.q-no.no{background:#fdf1ee;border-color:#f3d9d2;color:var(--coral)}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);
+  border-radius:8px;cursor:pointer;font-size:13.5px;transition:.13s;background:var(--surface);line-height:1.65}
+.opt:hover{border-color:var(--line-2);background:var(--surface-2)}
+.opt .mk{flex:none;width:19px;height:19px;border-radius:50%;border:1px solid var(--line-2);
+  display:grid;place-items:center;font-size:10px;font-weight:600;margin-top:1px;transition:.13s;color:var(--text-3)}
+.opt.pick{border-color:#1f1e1d;background:#f7f6f2}
+.opt.pick .mk{border-color:#1f1e1d;background:#1f1e1d;color:#faf9f5}
+.opt.right{border-color:#cfe0d5;background:#f3f8f5}
+.opt.right .mk{border-color:var(--cyan);background:var(--cyan);color:#fff}
+.opt.bad{border-color:#f0d5cd;background:#fdf3f0}
+.opt.bad .mk{border-color:var(--coral);background:var(--coral);color:#fff}
+.opt.lock{cursor:default;pointer-events:none}
+.expl{margin-top:12px;font-size:13px;color:var(--text-2);background:var(--surface-2);
+  border-radius:7px;padding:11px 14px;border-left:2px solid var(--cyan);line-height:1.75;animation:up .3s}
+.exam-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 24px;background:var(--surface-2);flex-wrap:wrap}
+.result{padding:44px 26px 26px;text-align:center}
+.result-score{font-family:var(--serif);font-size:60px;font-weight:500;letter-spacing:-3px;line-height:1;color:var(--text)}
+.result-lbl{font-size:13px;color:var(--text-3);margin-top:12px}
+.result-xp{display:inline-flex;align-items:center;gap:6px;margin-top:18px;padding:5px 13px;
+  border-radius:20px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-size:12.5px;font-weight:500}
+.rev{text-align:left;margin-top:28px;border-top:1px solid var(--line);padding-top:2px}
+.rev-i{padding:16px 0;border-bottom:1px solid var(--line)}
+.rev-i:last-child{border-bottom:none}
+
+/* ---------- 统计 ---------- */
+.chart{display:flex;align-items:flex-end;gap:10px;height:180px;padding:10px 0 0}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.bar{width:100%;max-width:38px;background:var(--lime);border-radius:4px 4px 2px 2px;
+  min-height:4px;transition:.4s cubic-bezier(.16,1,.3,1);opacity:.9}
+.bar:hover{opacity:1}
+.bv{font-size:11px;font-weight:550;color:var(--text-2);font-variant-numeric:tabular-nums}
+.bl{font-size:10.5px;color:var(--text-3);white-space:nowrap}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{text-align:left;font-size:11px;font-weight:500;color:var(--text-3);
+  padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t tr:last-child td{border-bottom:none}
+table.t td.n{font-variant-numeric:tabular-nums;font-weight:550}
+.prog{height:3px;border-radius:2px;background:var(--surface-3);overflow:hidden;min-width:52px}
+.prog i{display:block;height:100%;border-radius:2px;background:var(--lime);transition:.5s cubic-bezier(.16,1,.3,1)}
+.prog i.done{background:var(--cyan)}
+
+/* ---------- 本周重点 ---------- */
+.sum{font-size:13.5px;color:var(--text-2);line-height:1.85;margin:0 0 24px;
+  padding:15px 18px;background:var(--surface-2);border-radius:9px;border-left:2px solid var(--lime)}
+.fc{border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:12px;background:var(--surface);transition:.15s}
+.fc:hover{border-color:var(--line-2)}
+.fc-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.fc-n{width:22px;height:22px;border-radius:50%;background:#1f1e1d;color:#faf9f5;
+  display:grid;place-items:center;font-size:11px;font-weight:600;flex:none}
+.fc-t{font-family:var(--serif);font-weight:500;font-size:15px;letter-spacing:-.1px}
+.fc-d{font-size:13px;color:var(--text-2);line-height:1.75;margin-bottom:11px}
+.drill{background:#faf6ec;border:1px solid #eee2c9;border-radius:8px;
+  padding:12px 14px;font-size:12.5px;color:var(--amber);margin-top:14px;line-height:1.75}
+.drill b{font-weight:600;margin-right:7px;font-size:11px}
+
+/* ---------- 弹层 ---------- */
+.modal{position:fixed;inset:0;background:rgba(31,30,29,.4);display:none;place-items:center;padding:20px;
+  z-index:60;backdrop-filter:blur(3px)}
+.modal.on{display:grid;animation:fade .16s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.mc{background:var(--surface);border-radius:14px;border:1px solid var(--line);
+  padding:28px;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(31,30,29,.16);animation:pop .24s cubic-bezier(.16,1,.3,1)}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+.mc-h{font-family:var(--serif);font-size:18px;font-weight:500;margin:0 0 6px;letter-spacing:-.2px}
+.mc-p{font-size:12.5px;color:var(--text-3);margin:0 0 22px;line-height:1.65}
+.row{display:flex;gap:9px;align-items:center}
+.spin{width:12px;height:12px;border:2px solid rgba(250,249,245,.3);border-top-color:#faf9f5;
+  border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+.spin.d{border-color:var(--line-2);border-top-color:var(--lime)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:#1f1e1d;border:1px solid #1f1e1d;color:#faf9f5;padding:11px 20px;
+  border-radius:9px;font-size:12.5px;opacity:0;transition:.26s;pointer-events:none;z-index:99;
+  box-shadow:0 12px 32px rgba(31,30,29,.2);max-width:90vw}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.apikey{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface-2);
+  padding:3px 7px;border-radius:5px;cursor:pointer;border:1px solid var(--line);transition:.13s}
+.apikey:hover{color:var(--lime);border-color:#eed9d0}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.conf{position:absolute;width:7px;height:7px;border-radius:1px;animation:fall 1.6s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0}}
+@media(max-width:960px){.grid2{grid-template-columns:1fr}.hero{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.shell{grid-template-columns:1fr}.side{display:none}.main{padding:0 20px 64px}}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+<rect width="64" height="64" rx="14" fill="#c15f3c"/>
+<g stroke="#faf9f5" stroke-width="6.5" stroke-linecap="round" fill="none">
+<path d="M22 18h20M22 32h14M22 46h20M22 18v28"/></g>
+<circle cx="47" cy="46" r="4" fill="#faf9f5"/></svg></div>
+      <div>
+        <div class="brand-t">English Coach</div>
+        <div class="brand-s">DAILY PRACTICE</div>
+      </div>
+    </div>
+    <div class="login-card">
+      <h1 class="login-h">登录</h1>
+      <p class="login-p">记录你在英文写作里卡住的地方。系统会据此出题。</p>
+      <div class="alert" id="loginErr"></div>
+      <label class="f"><span>用户名</span><input class="inp" id="u" autocomplete="username" placeholder="admin"></label>
+      <label class="f"><span>密码</span><input class="inp" id="p" type="password" autocomplete="current-password" placeholder="••••••"></label>
+      <button class="btn btn-lime btn-block" id="loginBtn">进入</button>
+    </div>
+  </div>
+</section>
+
+<div id="app">
+  <div class="shell">
+    <aside class="side">
+      <div class="brand">
+        <div class="mark"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+<rect width="64" height="64" rx="14" fill="#c15f3c"/>
+<g stroke="#faf9f5" stroke-width="6.5" stroke-linecap="round" fill="none">
+<path d="M22 18h20M22 32h14M22 46h20M22 18v28"/></g>
+<circle cx="47" cy="46" r="4" fill="#faf9f5"/></svg></div>
+        <div>
+          <div class="brand-t">English Coach</div>
+          <div class="brand-s">DAILY PRACTICE</div>
+        </div>
+      </div>
+      <div class="nl">训练</div>
+      <button class="nav on" data-view="dash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5L12 3l9 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V21h14V9.5" stroke-linecap="round"/></svg>
+        今日
+      </button>
+      <button class="nav" data-view="exam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L4.5 13.5H11l-1 8.5L19 10.5h-6.5z" stroke-linejoin="round"/></svg>
+        今日练习
+      </button>
+      <button class="nav" data-view="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h9" stroke-linecap="round"/></svg>
+        卡点记录
+      </button>
+      <button class="nav" data-view="plan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2.3 6.4 6.7.2-5.3 4.1 1.8 6.5L12 16.6 6.5 20.2l1.8-6.5-5.3-4.1 6.7-.2z" stroke-linejoin="round"/></svg>
+        本周重点
+      </button>
+      <div class="nl">数据</div>
+      <button class="nav" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2" stroke-linecap="round"/></svg>
+        进度
+      </button>
+      <button class="nav" data-view="users" id="navUsers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.3"/><path d="M2.6 20c0-3.2 2.9-5.4 6.4-5.4s6.4 2.2 6.4 5.4" stroke-linecap="round"/><path d="M16.8 4.6a3 3 0 010 5.7M18.4 20c0-2.2-.8-3.9-2-4.9" stroke-linecap="round"/></svg>
+        成员
+      </button>
+      <div class="side-foot">
+        <div class="who">
+          <div class="av" id="av">A</div>
+          <div style="min-width:0;flex:1">
+            <div class="wn" id="whoName">—</div>
+            <div class="wr" id="whoRole">—</div>
+          </div>
+        </div>
+        <button class="nav" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 17l5-5-5-5M20 12H9" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4H6a2 2 0 00-2 2v12a2 2 0 002 2h6" stroke-linecap="round"/></svg>
+          退出
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="view on" id="v-dash">
+        <div class="top">
+          <div>
+            <h2 class="pt" id="dashGreet">今日</h2>
+            <p class="ps" id="dashSub">—</p>
+          </div>
+          <button class="btn btn-lime btn-sm" id="quickReport">记一笔</button>
+        </div>
+        <div class="hero" id="hero"></div>
+        <div class="grid2">
+          <div class="card pad">
+            <div class="cal-h">
+              <div class="cal-m" id="calMonth">—</div>
+              <div class="row">
+                <button class="btn btn-sm btn-ghost" id="calPrev">‹</button>
+                <button class="btn btn-sm btn-ghost" id="calNext">›</button>
+              </div>
+            </div>
+            <div class="cg" id="calGrid"></div>
+            <div class="lg">
+              <span><i style="background:var(--lime)"></i>有记录</span>
+              <span><i style="background:var(--cyan)"></i>已练习</span>
+            </div>
+          </div>
+          <div id="questBox"></div>
+        </div>
+        <div class="card pad" style="margin-top:16px">
+          <div class="ct">最近</div>
+          <div id="dashRecent"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-exam">
+        <div class="top">
+          <div>
+            <h2 class="pt">今日练习</h2>
+            <p class="ps">题目来自你的记录。答错的会降级，之后还会出现。</p>
+          </div>
+          <button class="btn btn-sm" id="examRegen">换一批</button>
+        </div>
+        <div class="card" id="examCard"></div>
+        <div class="card pad" style="margin-top:16px">
+          <div class="ct">练习记录</div>
+          <div id="examHist"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-reports">
+        <div class="top">
+          <div>
+            <h2 class="pt">卡点记录</h2>
+            <p class="ps" id="repSub"></p>
+          </div>
+          <div class="row">
+            <input type="date" class="inp" id="repDate" style="padding:7px 11px;width:auto;font-size:12.5px">
+            <button class="btn btn-lime btn-sm" id="repAdd">记一笔</button>
+          </div>
+        </div>
+        <div id="repList"></div>
+      </section>
+
+      <section class="view" id="v-plan">
+        <div class="top">
+          <div>
+            <h2 class="pt">本周重点</h2>
+            <p class="ps">根据最近记录归纳的三个要点。</p>
+          </div>
+          <div class="row">
+            <select class="inp" id="planDays" style="padding:7px 11px;width:auto;font-size:12.5px">
+              <option value="7">近 7 天</option>
+              <option value="14">近 14 天</option>
+              <option value="30">近 30 天</option>
+            </select>
+            <button class="btn btn-lime btn-sm" id="planGen">生成</button>
+          </div>
+        </div>
+        <div class="card pad" id="planBody"></div>
+      </section>
+
+      <section class="view" id="v-stats">
+        <div class="top">
+          <div>
+            <h2 class="pt">进度</h2>
+            <p class="ps">按周统计的记录量与正确率。</p>
+          </div>
+        </div>
+        <div class="hero" style="grid-template-columns:repeat(4,1fr)" id="statMetrics"></div>
+        <div class="card pad">
+          <div class="ct">每周记录量</div>
+          <div class="chart" id="statChart"></div>
+        </div>
+        <div class="card pad" style="margin-top:16px">
+          <div class="ct">每周明细</div>
+          <div id="statTable"></div>
+        </div>
+        <div class="card pad" style="margin-top:16px">
+          <div class="ct">知识点熟练度 <span style="font-weight:400;font-size:11.5px;color:var(--text-3)">满级 5 · 答对 +1 · 答错 -2</span></div>
+          <div id="statCards"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-users">
+        <div class="top">
+          <div>
+            <h2 class="pt">成员</h2>
+            <p class="ps">每个成员的数据相互隔离。API Key 用于外部工具上报。</p>
+          </div>
+          <button class="btn btn-lime btn-sm" id="userAdd">新建</button>
+        </div>
+        <div class="card" id="userTable"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="modal" id="mReport">
+  <div class="mc">
+    <h3 class="mc-h">记一笔</h3>
+    <p class="mc-p">粘贴你写的英文，或只写中文意图。</p>
+    <label class="f"><span>你写的英文</span>
+      <textarea class="inp" id="rSel" rows="2" placeholder="please kindly confirm this ASAP"></textarea></label>
+    <label class="f"><span>你想表达什么（中文）</span>
+      <textarea class="inp" id="rIntent" rows="2" placeholder="想催他但他是老板，要客气"></textarea></label>
+    <label class="f"><span>在哪写的</span>
+      <input class="inp" id="rApp" placeholder="Feishu / Gmail / Slack"></label>
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn" id="rCancel">取消</button>
+      <button class="btn btn-lime" id="rSubmit">提交</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mUser">
+  <div class="mc">
+    <h3 class="mc-h">新建成员</h3>
+    <p class="mc-p">创建后会自动生成 API Key。</p>
+    <label class="f"><span>用户名</span><input class="inp" id="nuName" placeholder="alice"></label>
+    <label class="f"><span>显示名</span><input class="inp" id="nuDisp" placeholder="Alice"></label>
+    <label class="f"><span>密码（≥6 位）</span><input class="inp" id="nuPw" type="password"></label>
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn" id="nuCancel">取消</button>
+      <button class="btn btn-lime" id="nuSubmit">创建</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti" id="confetti"></div>
+<script src="/app.js"></script>
+</body>
+</html>

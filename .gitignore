@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 本地数据库与运行数据
+*.db
+*.db-journal
+*.db-wal
+data/
+
+# 本地密钥与配置，绝不能提交
+.env
+.env.*
+key
+api
+secrets/
+*secret*.yaml
+kubeconfig*.yaml
+
+# 菜单栏编译产物
+menubar/EnglishCoach
+menubar/*.o
+menubar/*.dSYM/
+
+# 图标中间产物（源脚本 make_icon.py 可重建）
+menubar/icons/AppIcon.iconset/
+
+# 编辑器
+.idea/
+.vscode/
+*.swp

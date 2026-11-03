@@ -1,0 +1,88 @@
+#!/bin/bash
+# ec —— 从终端上报英文卡点
+# 用法：
+#   ec "please kindly confirm this ASAP" "催老板但要客气"
+#   echo "your english" | ec "中文意图"
+#   ec -i            # 交互式
+#   ec -l            # 看今天记录
+
+set -uo pipefail
+
+API="${ENGLISH_COACH_API:-}"
+[ -z "$API" ] && [ -f "$HOME/.english-coach/api" ] && API=$(tr -d ' \n\r' < "$HOME/.english-coach/api")
+API="${API:-http://127.0.0.1:8080}"
+KEY="${ENGLISH_COACH_KEY:-}"
+[ -z "$KEY" ] && [ -f "$HOME/.english-coach/key" ] && KEY=$(tr -d ' \n\r' < "$HOME/.english-coach/key")
+
+if [ -z "$KEY" ]; then
+  echo "未配置 API Key。请写入：echo 你的KEY > ~/.english-coach/key" >&2
+  exit 1
+fi
+
+show_result() {
+  python3 -c '
+import json, sys
+raw = sys.stdin.read()
+try:
+    d = json.loads(raw)
+except Exception:
+    print("  ✗ 提交失败：" + raw[:300])
+    sys.exit(1)
+if "error" in d:
+    print("  ✗ " + str(d["error"]))
+    sys.exit(1)
+
+print()
+print("  \033[1m" + (d.get("topic") or "") + "\033[0m")
+why = d.get("why_wrong") or ""
+if why:
+    print("  " + why)
+lv = d.get("levels") or {}
+print()
+for label, k in (("平级", "peer"), ("对上级", "manager"), ("正式", "formal_email")):
+    if lv.get(k):
+        print("  \033[2m" + label + "\033[0m  \033[36m" + lv[k] + "\033[0m")
+pat = d.get("pattern") or ""
+if pat:
+    print()
+    print("  \033[2m句型\033[0m  " + pat)
+print()
+'
+}
+
+case "${1:-}" in
+  -l|list)
+    curl -sS -m 20 "$API/api/events?limit=10" -H "X-API-Key: $KEY" | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+for e in d.get("events",[]):
+    print("  " + e.get("ts","")[:16].replace("T"," ") + "  " + (e.get("topic") or ""))
+'
+    exit 0
+    ;;
+  -i|"")
+    read -r -p "你写的英文（可空）: " SEL
+    read -r -p "中文意图: " INTENT
+    [ -z "$SEL" ] && [ -z "$INTENT" ] && exit 0
+    ;;
+  *)
+    SEL="$1"
+    INTENT="${2:-}"
+    if [ -z "$INTENT" ] && [ ! -t 0 ]; then
+      INTENT=$(cat)
+    fi
+    ;;
+esac
+
+# 若 stdin 有内容且第一参数不是文本，优先用 stdin
+if [ -n "${SEL:-}" ] && [ -z "${INTENT:-}" ] && [ ! -t 0 ]; then
+  INTENT=$(cat)
+fi
+
+BODY=$(SEL="${SEL:-}" INTENT="${INTENT:-}" python3 -c '
+import json,os
+print(json.dumps({"selected":os.environ.get("SEL",""),"intent_zh":os.environ.get("INTENT",""),"app":"Terminal"},ensure_ascii=False))
+')
+
+curl -sS -m 120 -X POST "$API/api/report" \
+  -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d "$BODY" | show_result

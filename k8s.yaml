@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: english-coach-data
+  namespace: chenyz
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: openebs-hostpath
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: english-coach
+  namespace: chenyz
+  labels: {app: english-coach}
+spec:
+  replicas: 1
+  # SQLite 单写者，重建时先停旧的
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {app: english-coach}
+  template:
+    metadata:
+      labels: {app: english-coach}
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: app
+          image: python:3.12-slim
+          command: ["python", "/app/app.py"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DB_PATH
+              value: /data/coach.db
+            # 模型地址与 id 由 Secret 提供，避免把个人服务信息写进仓库。
+            # 创建方式见 README「部署」。
+            - name: LLM_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: english-coach-llm
+                  key: base-url
+            - name: LLM_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: english-coach-llm
+                  key: model
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: english-coach-llm
+                  key: api-key
+          volumeMounts:
+            - name: code
+              mountPath: /app
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+      volumes:
+        - name: code
+          configMap:
+            name: english-coach-code
+        - name: data
+          persistentVolumeClaim:
+            claimName: english-coach-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: english-coach
+  namespace: chenyz
+spec:
+  type: NodePort
+  selector: {app: english-coach}
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30181
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: english-coach-weekly
+  namespace: chenyz
+spec:
+  # 每周一 09:00（Pod 内为 UTC，即北京时间 17:00），生成 7 天计划
+  schedule: "0 1 * * 1"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.10.1
+              command:
+                - sh
+                - -c
+                - curl -sS -m 300 -X POST "http://english-coach.chenyz.svc.cluster.local/api/analyze?days=7"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
